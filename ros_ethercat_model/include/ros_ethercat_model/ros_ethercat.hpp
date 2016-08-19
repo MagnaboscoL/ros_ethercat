@@ -51,6 +51,7 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <pr2_mechanism_msgs/MechanismStatistics.h>
+#include <myo_interface/myoMuscleJointInterface.h>
 #include "ros_ethercat_model/robot_state.hpp"
 #include "ros_ethercat_model/robot_state_interface.hpp"
 #include "ros_ethercat_model/mech_stats_publisher.hpp"
@@ -128,12 +129,13 @@ public:
                                                &it->second->effort_);
       joint_state_interface_.registerHandle(jsh);
 
-      joint_position_command_interface_.registerHandle(hardware_interface::JointHandle(jsh,
-                                                                                       & it->second->commanded_position_));
-      joint_velocity_command_interface_.registerHandle(hardware_interface::JointHandle(jsh,
-                                                                                       & it->second->commanded_velocity_));
-      joint_effort_command_interface_.registerHandle(hardware_interface::JointHandle(jsh,
-                                                                                     & it->second->commanded_effort_));
+      hardware_interface::JointHandle jh(jsh, &it->second->commanded_effort_);
+
+      joint_effort_command_interface_.registerHandle(jh);
+
+      myo_interface::MyoMuscleJointHandle mmjh(jh, &it->second->displacement_, it->second->analogIN_);
+
+      myo_muscle_joint_interface_.registerHandle(mmjh);
     }
 
     if (!model_->joint_states_.empty())
@@ -143,9 +145,8 @@ public:
 
     registerInterface(&robot_state_interface_);
     registerInterface(&joint_state_interface_);
-    registerInterface(&joint_position_command_interface_);
-    registerInterface(&joint_velocity_command_interface_);
     registerInterface(&joint_effort_command_interface_);
+    registerInterface(&myo_muscle_joint_interface_);
   }
 
   virtual ~RosEthercat()
@@ -249,12 +250,13 @@ public:
                                                &it->second->effort_);
       joint_state_interface_.registerHandle(jsh);
 
-      joint_position_command_interface_.registerHandle(hardware_interface::JointHandle(jsh,
-                                                                                       & it->second->commanded_position_));
-      joint_velocity_command_interface_.registerHandle(hardware_interface::JointHandle(jsh,
-                                                                                       & it->second->commanded_velocity_));
-      joint_effort_command_interface_.registerHandle(hardware_interface::JointHandle(jsh,
-                                                                                     & it->second->commanded_effort_));
+      hardware_interface::JointHandle jh(jsh, &it->second->commanded_effort_);
+
+      joint_effort_command_interface_.registerHandle(jh);
+
+      myo_interface::MyoMuscleJointHandle mmjh(jh, &it->second->displacement_, it->second->analogIN_);
+
+      myo_muscle_joint_interface_.registerHandle(mmjh);
     }
 
     if (!model_->joint_states_.empty())
@@ -264,9 +266,8 @@ public:
 
     registerInterface(&robot_state_interface_);
     registerInterface(&joint_state_interface_);
-    registerInterface(&joint_position_command_interface_);
-    registerInterface(&joint_velocity_command_interface_);
     registerInterface(&joint_effort_command_interface_);
+    registerInterface(&myo_muscle_joint_interface_);
 
     // Start a thread to collect diagnostics. This could actually be inside the EthercatHardware class
     // but until we remove the compatibility mode this will do.
@@ -361,9 +362,10 @@ public:
   hardware_interface::JointStateInterface joint_state_interface_;
 
   // joint command interface
-  hardware_interface::PositionJointInterface joint_position_command_interface_;
-  hardware_interface::VelocityJointInterface joint_velocity_command_interface_;
   hardware_interface::EffortJointInterface joint_effort_command_interface_;
+
+  // myoJoint interface
+  myo_interface::MyoMuscleJointInterface myo_muscle_joint_interface_;
 
 protected:
   static int lock_fd(int fd)

@@ -153,14 +153,14 @@ public:
   /// The joint effort in Nm or N (read-only variable)
   double effort_;
 
+  /// The displacement of the spring (read-only variable)
+  double displacement_;
+
+  /// The analogIn sensor values used for jointangle-sensor (read-only variable)
+  double analogIN_[6];
+
   // joint statistics
   JointStatistics joint_statistics_;
-
-  /// The position the joint should move to in radians or meters (write-to variable)
-  double commanded_position_;
-
-  /// The velocity the joint should move with in radians/sec or meters/sec (write-to variable)
-  double commanded_velocity_;
 
   /// The effort the joint should apply in Nm or N (write-to variable)
   double commanded_effort_;
@@ -176,12 +176,15 @@ public:
     position_(0.0),
     velocity_(0.0),
     effort_(0.0),
-    commanded_position_(0.0),
-    commanded_velocity_(0.0),
+    displacement_(0.0),
     commanded_effort_(0.0),
     calibrated_(false),
     reference_position_(0.0)
   {
+    for(int i = 0; i < 6; i++)
+    {
+      analogIN_[i] = 0.0;
+    }
   }
 };
 inline void JointStatistics::update(JointState *jnt)
