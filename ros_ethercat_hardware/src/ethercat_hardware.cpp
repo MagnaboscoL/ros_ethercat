@@ -855,17 +855,28 @@ EthercatHardware::configSlave(EtherCAT_SlaveHandler *sh)
   std::vector<std::string> classes = device_loader_.getDeclaredClasses();
   std::string matching_class_name;
 
+  std::string prio_driver_pkg;
+  ros::param::get("ethercat_prio_driver_package", prio_driver_pkg);
+
   BOOST_FOREACH(const std::string &class_name, classes)
   {
     if (regex_match(class_name, class_name_regex))
     {
       if (matching_class_name.size() != 0)
       {
-        ROS_ERROR("Found more than 1 EtherCAT driver for device with product code : %d", product_code);
-        ROS_ERROR("First class name = '%s'.  Second class name = '%s'",
+        if (class_name.find(prio_driver_pkg) == 0)
+        {
+          matching_class_name = class_name;
+        } 
+        else if (matching_class_name.find(prio_driver_pkg) != 0)
+        {
+          ROS_ERROR("Found more than 1 EtherCAT driver for device with product code : %d", product_code);
+          ROS_ERROR("First class name = '%s'.  Second class name = '%s'",
                   class_name.c_str(), matching_class_name.c_str());
+        }        
+      } else {
+        matching_class_name = class_name;
       }
-      matching_class_name = class_name;
     }
   }
 

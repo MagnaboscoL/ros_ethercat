@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     cmake_modules
     realtime_tools
     ros_ethercat_hardware
+    myo_interface
 )
 
 find_package(Boost REQUIRED COMPONENTS system thread)
@@ -39,6 +40,7 @@ CATKIN_DEPENDS
     pr2_mechanism_msgs
     realtime_tools
     ros_ethercat_hardware
+    myo_interface
 INCLUDE_DIRS
     include
 CFG_EXTRAS
